@@ -59,10 +59,10 @@ Plus `templates/sample-data/weekly_kpi_sample.csv` to test the KPI prompts immed
 
 These prompts and templates are free (MIT). If you want them connected to your CRM, helpdesk, Linear/Jira or Slack as a working MCP server or n8n/Make flow, I run fixed-scope 2-week pilots:
 
-- Live demo & details: https://alborotar.github.io/mcp-automation-starter/
+- Live demo & details: https://quietstack-labs.github.io/mcp-automation-starter/
 - Email: [alborotv@gmail.com](mailto:alborotv@gmail.com?subject=AI%20Ops%20Pack%20Pilot%20Inquiry)
 
-Related open-source tools: [mcp-automation-starter](https://github.com/alborotar/mcp-automation-starter) · [mcp-support-quote-starter](https://github.com/alborotar/mcp-support-quote-starter) · [invoice-usdc-kit](https://github.com/alborotar/invoice-usdc-kit) · [data-swiss-army](https://github.com/alborotar/data-swiss-army)
+Related open-source tools: [mcp-automation-starter](https://github.com/quietstack-labs/mcp-automation-starter) · [mcp-support-quote-starter](https://github.com/quietstack-labs/mcp-support-quote-starter) · [invoice-usdc-kit](https://github.com/quietstack-labs/invoice-usdc-kit) · [data-swiss-army](https://github.com/quietstack-labs/data-swiss-army)
 
 ## License
 MIT — see `LICENSE`.
