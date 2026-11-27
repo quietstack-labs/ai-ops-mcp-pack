@@ -1,5 +1,8 @@
 # AI Ops & MCP Prompt + Automation Mega-Pack · v1.0
 
+💼 **Get the complete pack:** [AI Ops & MCP Prompt + Automation Mega-Pack ($12)](https://playmaster72.gumroad.com/l/mxttvof) — every prompt and template in one download, plus updates.
+
+
 **28 copy-paste system prompts + 12 ready-to-use JSON/YAML/IDE templates (40 assets)** for the business tasks teams actually automate first: lead qualification, follow-up email, meeting → tickets, support triage & refunds, weekly KPI and finance analysis, and Claude Desktop / Cursor MCP setup.
 
 Works with Claude, ChatGPT, Gemini, Cursor, Claude Code, n8n, Make and Zapier. No code required for the prompts; the workflows are tool-agnostic specs you can map onto any automation platform or a small script.
