@@ -1,6 +1,6 @@
 # AI Ops & MCP Prompt + Automation Mega-Pack · v1.0
 
-💼 **Get the complete pack:** [AI Ops & MCP Prompt + Automation Mega-Pack ($12)](https://playmaster72.gumroad.com/l/mxttvof) — every prompt and template in one download, plus updates.
+💼 **Packaged on Gumroad:** [AI Ops & MCP Prompt + Automation Mega-Pack ($12)](https://playmaster72.gumroad.com/l/mxttvof) — 28 prompts + 12 templates in one download — one-click packaged download that supports continued development.
 
 
 **28 copy-paste system prompts + 12 ready-to-use JSON/YAML/IDE templates (40 assets)** for the business tasks teams actually automate first: lead qualification, follow-up email, meeting → tickets, support triage & refunds, weekly KPI and finance analysis, and Claude Desktop / Cursor MCP setup.
