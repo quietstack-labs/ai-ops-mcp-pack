@@ -1,0 +1,18 @@
+---
+description: TypeScript / Node API service conventions
+globs: ["src/**/*.ts", "test/**/*.ts"]
+alwaysApply: false
+---
+
+# TypeScript API rules (save as .cursor/rules/typescript-api.mdc)
+
+- `strict: true`. No `any`; use `unknown` + narrowing. Exported functions have explicit return types.
+- Validate every external input (HTTP body, query, env, webhook payload) with a schema (zod/valibot) at the boundary; internal code receives typed, validated data.
+- Errors: throw typed errors (`class NotFoundError extends AppError`) and map them to HTTP status in ONE error middleware. Never leak stack traces to clients.
+- Async: always `await` or explicitly `void` promises; no floating promises. Use `AbortSignal` timeouts for outbound HTTP.
+- Config: read env once in `config.ts`, validate, export a frozen object. No `process.env` elsewhere.
+- Logging: structured JSON (pino). Include `requestId`. Never log tokens, passwords, full card numbers or emails.
+- DB: parameterized queries only. Migrations are forward-only and idempotent.
+- Tests: vitest/node:test. Unit-test pure logic; integration-test routes with a real test DB or an in-memory fake — no mocking of the module under test.
+- Money: integer minor units (cents) + ISO currency code. Never floats.
+- Dates: store UTC ISO-8601; convert to local only at the presentation edge.

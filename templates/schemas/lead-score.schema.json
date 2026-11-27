@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/lead-score.schema.json",
+  "title": "Inbound lead score (prompt S-01)",
+  "type": "object",
+  "required": ["company", "contact_name", "contact_role", "bant", "evidence", "icp_fit", "disqualifiers_hit", "total_score", "tier", "next_action", "personalization_hook", "questions_for_discovery"],
+  "additionalProperties": false,
+  "$defs": { "bantScore": { "type": "integer", "minimum": 0, "maximum": 3 } },
+  "properties": {
+    "company": { "type": "string" },
+    "contact_name": { "type": "string" },
+    "contact_role": { "type": "string" },
+    "bant": {
+      "type": "object",
+      "required": ["budget", "authority", "need", "timeline"],
+      "additionalProperties": false,
+      "properties": {
+        "budget": { "$ref": "#/$defs/bantScore" },
+        "authority": { "$ref": "#/$defs/bantScore" },
+        "need": { "$ref": "#/$defs/bantScore" },
+        "timeline": { "$ref": "#/$defs/bantScore" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["budget", "authority", "need", "timeline"],
+      "additionalProperties": { "type": "string" }
+    },
+    "icp_fit": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "disqualifiers_hit": { "type": "array", "items": { "type": "string" } },
+    "total_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "tier": { "enum": ["A", "B", "C", "DQ"] },
+    "next_action": { "type": "string" },
+    "personalization_hook": { "type": "string" },
+    "questions_for_discovery": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } }
+  }
+}

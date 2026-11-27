@@ -1,0 +1,59 @@
+# New support ticket -> triage -> route -> draft reply (human sends)
+name: support-triage
+version: 1
+trigger:
+  type: webhook
+  examples: ["Zendesk ticket.created", "Intercom conversation.user.created", "Help Scout convo.created", "Gmail label 'support'"]
+inputs:
+  ticket_id: string
+  subject: string
+  body: text
+  customer: { plan: string, account_age_days: int, ltv: number, language: string }
+config:
+  auto_send: false          # drafts only; a human approves
+  refund_policy_file: policies/refund.md
+  sla_hours: { S1: 1, S2: 4, S3: 24, S4: 48 }
+steps:
+  - id: triage
+    run: llm
+    prompt_file: prompts/05-support-escalation-refunds.md#C-01
+    output_schema: templates/schemas/support-triage.schema.json
+
+  - id: route
+    run: switch
+    on: ${steps.triage.output.escalate_to}
+    cases:
+      security:    { assign_group: "Security", page_oncall: true }
+      legal:       { assign_group: "Legal", tag: "do-not-auto-reply" }
+      engineering: { assign_group: "Tier 2", then: escalation_note }
+      billing:     { assign_group: "Billing", then: refund_draft }
+      default:     { assign_group: "Tier 1", then: reply_draft }
+
+  - id: escalation_note
+    run: llm
+    prompt_file: prompts/05-support-escalation-refunds.md#C-03
+
+  - id: refund_draft
+    when: ${steps.triage.output.category == "refund_request"}
+    run: llm
+    prompt_file: prompts/05-support-escalation-refunds.md#C-02
+    variables: { refund_policy: "file(${config.refund_policy_file})" }
+
+  - id: reply_draft
+    run: llm
+    prompt_file: prompts/05-support-escalation-refunds.md#C-04
+    when: ${steps.triage.output.sentiment <= -1}
+
+  - id: save
+    run: helpdesk.addInternalNote
+    with:
+      ticket_id: ${inputs.ticket_id}
+      note: |
+        [AI triage] ${steps.triage.output.severity} · ${steps.triage.output.category} · churn ${steps.triage.output.churn_risk}
+        ${steps.triage.output.summary}
+        --- Draft ---
+        ${coalesce(steps.refund_draft.output, steps.reply_draft.output, steps.escalation_note.output)}
+      set_due_in_hours: ${config.sla_hours[steps.triage.output.severity]}
+guards:
+  - "security and legal_privacy tickets never get an AI-drafted customer reply."
+  - "Refund decisions must cite a policy line; anything else is 'needs approval'."

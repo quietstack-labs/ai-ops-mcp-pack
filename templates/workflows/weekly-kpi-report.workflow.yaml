@@ -1,0 +1,39 @@
+# Every Monday 09:00: pull KPI CSV -> compute with code -> LLM narrative -> Slack + email
+name: weekly-kpi-report
+version: 1
+trigger:
+  type: schedule
+  cron: "0 9 * * 1"
+  timezone: "Asia/Seoul"
+config:
+  source: { type: google_sheets, sheet_id: "<SHEET_ID>", range: "KPI!A1:Z" }   # or: csv url, postgres query
+  targets: { revenue: 25000, new_customers: 40, churned_customers_max: 6, trial_to_paid_rate: 0.18 }
+  recipients: { slack: "#leadership", email: ["ceo@yourco.com"] }
+steps:
+  - id: fetch
+    run: sheets.read            # or http.get / postgres.query
+  - id: compute
+    run: code                   # deterministic numbers first — never let the LLM do arithmetic on raw rows
+    language: python
+    code: |
+      import pandas as pd
+      df = pd.DataFrame(rows).sort_values("week_start")
+      num = df.select_dtypes("number").columns
+      last, prev = df.iloc[-1], df.iloc[-2]
+      avg4 = df[num].iloc[-5:-1].mean()
+      out = {c: {"this": float(last[c]), "wow_pct": float((last[c]-prev[c])/prev[c]*100) if prev[c] else None,
+                 "vs4_pct": float((last[c]-avg4[c])/avg4[c]*100) if avg4[c] else None} for c in num}
+      out["trial_to_paid_rate"] = float(last["new_customers"]/last["trials"]) if last["trials"] else None
+      out["cac"] = float(last["ad_spend"]/last["new_customers"]) if last["new_customers"] else None
+      result = out
+  - id: narrate
+    run: llm
+    prompt_file: prompts/06-kpi-finance-analyzer.md#F-01
+    variables: { csv: "${steps.fetch.output_csv}", targets_json: "${config.targets}", precomputed: "${steps.compute.result}" }
+    instructions_append: "Use the precomputed numbers verbatim; do not recompute."
+  - id: publish
+    parallel:
+      - run: slack.postMessage
+        with: { channel: "${config.recipients.slack}", text: "${steps.narrate.output}" }
+      - run: email.send
+        with: { to: "${config.recipients.email}", subject: "Weekly KPI — ${today}", markdown: "${steps.narrate.output}" }

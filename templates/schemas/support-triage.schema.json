@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/support-triage.schema.json",
+  "title": "Support ticket triage (prompt C-01)",
+  "type": "object",
+  "required": ["category", "severity", "sentiment", "language", "churn_risk", "needs_human", "escalate_to", "pii_detected", "summary", "suggested_macro", "reasons"],
+  "additionalProperties": false,
+  "properties": {
+    "category": { "enum": ["billing", "refund_request", "bug", "how_to", "account_access", "feature_request", "security", "legal_privacy", "abuse", "other"] },
+    "severity": { "enum": ["S1", "S2", "S3", "S4"] },
+    "sentiment": { "type": "integer", "minimum": -2, "maximum": 2 },
+    "language": { "type": "string", "pattern": "^[a-z]{2}$" },
+    "churn_risk": { "enum": ["low", "medium", "high"] },
+    "needs_human": { "type": "boolean" },
+    "escalate_to": { "enum": ["none", "tier2", "engineering", "billing", "security", "legal"] },
+    "pii_detected": { "type": "boolean" },
+    "summary": { "type": "string", "maxLength": 160 },
+    "suggested_macro": { "type": ["string", "null"] },
+    "reasons": { "type": "array", "items": { "type": "string" } }
+  }
+}

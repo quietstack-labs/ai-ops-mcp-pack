@@ -1,0 +1,31 @@
+{
+  "name": "inbound-lead-qualification",
+  "version": 1,
+  "description": "Form submission -> enrich from company website -> score (S-01) -> route to CRM owner -> warm follow-up draft (E-01). Opt-in leads only.",
+  "trigger": { "type": "webhook", "examples": ["Typeform form_response", "HubSpot form submission", "Webflow form"] },
+  "config": {
+    "icp": {
+      "icp_company_size": "20-500 employees",
+      "icp_industries": ["SaaS", "e-commerce", "agencies"],
+      "icp_roles": ["Head of Ops", "COO", "RevOps", "Founder"],
+      "icp_disqualifiers": ["student", "personal email + no company", "competitor"]
+    },
+    "routing": { "A": "senior-ae", "B": "sdr-queue", "C": "nurture-sequence", "DQ": "archive" },
+    "consent_field": "marketing_opt_in",
+    "dry_run": true
+  },
+  "steps": [
+    { "id": "consent_gate", "run": "filter", "condition": "${inputs[config.consent_field]} == true || ${inputs.requested_contact} == true", "else": "stop" },
+    { "id": "enrich", "run": "http.get", "with": { "url": "https://${domain(inputs.email)}", "extract": "visible_text", "max_chars": 6000 }, "on_error": "continue" },
+    {
+      "id": "score",
+      "run": "llm",
+      "prompt_file": "prompts/01-sales-lead-qualification.md#S-01",
+      "variables": { "lead_form_submission_or_email": "${inputs}", "optional_company_website_text_or_linkedin_summary": "${steps.enrich.output}" },
+      "output_schema": "templates/schemas/lead-score.schema.json"
+    },
+    { "id": "crm_upsert", "run": "crm.upsertContact", "when": "${!config.dry_run}", "with": { "email": "${inputs.email}", "lead_score": "${steps.score.output.total_score}", "tier": "${steps.score.output.tier}", "owner": "${config.routing[steps.score.output.tier]}" } },
+    { "id": "draft_followup", "run": "llm", "when": "${steps.score.output.tier in ['A','B']}", "prompt_file": "prompts/02-email-sequences-en.md#E-01", "variables": { "trigger_event": "submitted our contact form", "interest": "${inputs.message}" } },
+    { "id": "notify", "run": "slack.postMessage", "with": { "channel": "#sales-inbound", "text": "New ${steps.score.output.tier} lead: ${steps.score.output.company} (${steps.score.output.total_score}) → ${steps.score.output.next_action}" } }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/action-items.schema.json",
+  "title": "Meeting action items (prompt M-01)",
+  "type": "object",
+  "required": ["summary", "decisions", "action_items", "open_questions", "parking_lot"],
+  "additionalProperties": false,
+  "properties": {
+    "summary": { "type": "string", "maxLength": 600 },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["decision", "made_by", "quote"],
+        "additionalProperties": false,
+        "properties": {
+          "decision": { "type": "string" },
+          "made_by": { "type": ["string", "null"] },
+          "quote": { "type": "string" }
+        }
+      }
+    },
+    "action_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "description", "owner", "due", "priority", "source_quote", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string", "maxLength": 120 },
+          "description": { "type": "string" },
+          "owner": { "type": ["string", "null"] },
+          "due": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "priority": { "enum": ["urgent", "high", "medium", "low"] },
+          "source_quote": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "parking_lot": { "type": "array", "items": { "type": "string" } }
+  }
+}
